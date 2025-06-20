@@ -33,7 +33,7 @@ Diese Anleitung beschreibt Schritt für Schritt, wie Sie die `.bak`-Datei (SQL S
 ---
 
 ### 4. Ziel-Datenbankname festlegen
-- Unter **Ziel** können Sie einen Namen für die wiederherzustellende Datenbank angeben, z. B. `AdmelioShopDB`
+- Unter **Ziel** können Sie einen Namen für die wiederherzustellende Datenbank angeben, z. B. `AdmelioShop`
 - Existiert bereits eine Datenbank mit diesem Namen, können Sie diese entweder überschreiben oder einen alternativen Namen vergeben
 
 ---
