@@ -1,4 +1,4 @@
-# 📦 Anleitung zur Wiederherstellung einer .bak-Datei in SQL Server Management Studio (SSMS)
+# 📦 Anleitung zur Wiederherstellung der AdmelioShop.bak-Datei in SQL Server Management Studio (SSMS)
 
 Diese Anleitung beschreibt Schritt für Schritt, wie Sie die `.bak`-Datei (SQL Server Backup) der AdmelioShop-Datenbank in **SQL Server Management Studio (SSMS)** einbinden und daraus eine funktionsfähige Datenbank wiederherstellen.
 
