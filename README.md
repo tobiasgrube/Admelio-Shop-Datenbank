@@ -64,5 +64,5 @@ Diese Anleitung beschreibt Schritt für Schritt, wie Sie die `.bak`-Datei (SQL S
 RESTORE DATABASE AdmelioShopDB
 FROM DISK = 'C:\Backups\AdmelioShop.bak'
 WITH REPLACE,
-     MOVE 'AdmelioShopDB_Data' TO 'C:\SQLData\AdmelioShop.mdf',
-     MOVE 'AdmelioShopDB_Log' TO 'C:\SQLData\AdmelioShop_log.ldf';
+     MOVE 'AdmelioShop_Data' TO 'C:\SQLData\AdmelioShop.mdf',
+     MOVE 'AdmelioShop_Log' TO 'C:\SQLData\AdmelioShop_log.ldf';
