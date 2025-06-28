@@ -61,7 +61,7 @@ Diese Anleitung beschreibt Schritt für Schritt, wie Sie die `.bak`-Datei (SQL S
 ## 🛠️ Alternative: Wiederherstellung per T-SQL
 
 ```sql
-RESTORE DATABASE AdmelioShopDB
+RESTORE DATABASE AdmelioShop
 FROM DISK = 'C:\Backups\AdmelioShop.bak'
 WITH REPLACE,
      MOVE 'AdmelioShop_Data' TO 'C:\SQLData\AdmelioShop.mdf',
