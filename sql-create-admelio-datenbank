@@ -1,0 +1,122 @@
+CREATE DATABASE AdmelioShop;
+GO
+USE AdmelioShop;
+GO
+
+CREATE TABLE Artikel (
+    ID INT IDENTITY PRIMARY KEY,
+    Artikelbezeichnung NVARCHAR(255),
+	Artikelgruppe NVARCHAR(255),
+	Preis SMALLMONEY,
+	Waehrung NCHAR(3),
+	Vorraetig BIT
+);
+
+CREATE TABLE Kunden (
+    ID INT IDENTITY PRIMARY KEY,
+    Vorname NVARCHAR(100),
+    Nachname NVARCHAR(50),
+    Email NVARCHAR(100),
+    Telefonnummer NVARCHAR(15),
+    Strasse NVARCHAR(100),
+    Hausnummer NCHAR(10),
+    PLZ NVARCHAR(5),
+    Ort NVARCHAR(100)
+);
+
+CREATE TABLE Bestellungen (
+    ID INT IDENTITY PRIMARY KEY,
+    ArtikelID INT,
+    KundenID INT,
+    Menge INT,
+    Bestelldatum DATE,
+    FOREIGN KEY (ArtikelID) REFERENCES Artikel(ID),  -- Foreign Key für ArtikelID
+    FOREIGN KEY (KundenID) REFERENCES Kunden(ID)     -- Foreign Key für KundenID
+);
+
+INSERT INTO Artikel (Artikelbezeichnung, Artikelgruppe, Preis, Waehrung, Vorraetig)
+VALUES 
+('Fernseher', 'Elektronik', 478.45, 'EUR', 0),
+('Laptop', 'Elektronik', 1050.79, 'EUR', 1),
+('Kühlschrank', 'Haushaltsgeräte', 1155.30, 'EUR', 1),
+('Waschmaschine', 'Haushaltsgeräte', 824.10, 'EUR', 1),
+('Smartphone', 'Elektronik', 775.56, 'EUR', 1),
+('Tablet', 'Elektronik', 683.25, 'EUR', 1),
+('Eismaschine', 'Haushaltsgeräte', 1025.49, 'EUR', 0),
+('Kopfhörer', 'Zubehör', 53.79, 'EUR', 1),
+('MacBook', 'Elektronik', 998.49, 'EUR', 1),
+('Monitor', 'Elektronik', 212.00, 'EUR', 1),
+('Maus', 'Elektronik', 28.65, 'EUR', 1),
+('Tastatur', 'Elektronik', 52.15, 'EUR', 1),
+('Drucker', 'Bürobedarf', 77.35, 'EUR', 1),
+('Schreibtisch', 'Möbel', 251.75, 'EUR', 0),
+('Bürostuhl', 'Möbel', 145.45, 'EUR', 0),
+('Tintenpatrone', 'Bürobedarf', 20.99, 'EUR', 1),
+('USB-Kabel', 'Elektronik', 8.25, 'EUR', 1),
+('Webcam', 'Elektronik', 61.80, 'EUR', 1),
+('Kugelschreiber (von Apple)', 'Bürobedarf', 98.75, 'EUR', 1),
+('Kaffeemaschine', 'Haushaltsgeräte', 100.00, 'EUR', 1),
+('Staubsauger', 'Haushaltsgeräte', 150.00, 'EUR', 1),
+('Mikrowelle', 'Haushaltsgeräte', 180.00, 'EUR', 0),
+('Beamer', 'Elektronik', 700.00, 'EUR', 1),
+('Externe Festplatte', 'Elektronik', 120.00, 'EUR', 1),
+('Bluetooth Lautsprecher', 'Zubehör', 30.00, 'EUR', 1),
+('Smartwatch', 'Elektronik', 250.00, 'EUR', 1),
+('Fitness Tracker', 'Elektronik', 120.00, 'EUR', 1),
+('Kühlbox', 'Haushaltsgeräte', 80.00, 'EUR', 1),
+('Taschenlampe', 'Zubehör', 15.00, 'EUR', 1),
+('Druckerpapier', 'Bürobedarf', 5.99, 'EUR', 1),
+('Sitzsack', 'Möbel', 69.99, 'EUR', 1),
+('Laptoptasche', 'Zubehör', 45.00, 'EUR', 1);
+
+
+INSERT INTO Kunden (Vorname, Nachname, Email, Telefonnummer, Strasse, Hausnummer, PLZ, Ort)
+VALUES 
+('Max', 'Mustermann', 'max.mustermann123@example.com', '0123456789', 'Musterstraße', '1', '12345', 'Berlin'),
+('Lisa', 'Müller', 'lisa.mueller456@example.net', '0987654321', 'Lindenweg', '5', '54321', 'Hamburg'),
+('John', 'Doe', 'john.doe789@example.org', '0123987654', 'Hauptstraße', '12', '98765', 'Köln'),
+('Anna', 'Schmidt', 'anna.schmidt101@example.com', '0301234567', 'Blumenweg', '8', '10115', 'Berlin'),
+('Peter', 'Meier', 'peter.meier202@example.de', '0409876543', 'Bergstraße', '20', '20457', 'Hamburg'),
+('Julia', 'Fischer', 'julia_fischer333@example.eu', '0711123456', 'Wiesenstraße', '3', '70173', 'Stuttgart'),
+('David', 'Weber', 'david.weber444@example.biz', '0691234567', 'Waldweg', '15', '60313', 'Frankfurt'),
+('Marie', 'Schneider', 'marie.schneider555@example.co', '0896543210', 'Bahnhofstraße', '25', '80331', 'München'),
+('Tom', 'Becker', 'tom.becker666@example.tv', '0211123456', 'Schillerstraße', '7', '40210', 'Düsseldorf'),
+('Laura', 'Wolf', 'laura_wolf777@example.name', '0613123456', 'Goethestraße', '14', '55116', 'Mainz'),
+('Michael', 'Koch', 'michael.koch888@example.pro', '0911234567', 'Marktplatz', '9', '90403', 'Nürnberg'),
+('Clara', 'Lange', 'clara.lange123@example.de', '0701234567', 'Wiesenstraße', '11', '50123', 'Düsseldorf'),
+('Felix', 'Bauer', 'felix.bauer234@example.org', '0765123456', 'Hauptstraße', '18', '40210', 'Köln'),
+('Sophia', 'Richter', 'sophia.richter345@example.net', '0731123456', 'Bachstraße', '5', '12345', 'Stuttgart'),
+('Lukas', 'Zimmermann', 'lukas.zimmermann456@example.co', '0745123456', 'Eichenweg', '3', '53212', 'München'),
+('Marie', 'Becker', 'marie.becker567@example.biz', '0708123456', 'Lindenstraße', '9', '67212', 'Berlin'),
+('Kai', 'Schwarz', 'kai.schwarz678@example.tv', '0723123456', 'Pappelstraße', '7', '23456', 'Hamburg'),
+('Eva', 'Neumann', 'eva.neumann789@example.pro', '0751123456', 'Birkenweg', '15', '34567', 'Mainz'),
+('Maximilian', 'Mayer', 'maximilian.mayer890@example.name', '0748123456', 'Rosenstraße', '21', '45678', 'Frankfurt'),
+('Hannah', 'Kramer', 'hannah.kramer901@example.com', '0759123456', 'Bergstraße', '17', '34567', 'Köln'),
+('Noah', 'Wolf', 'noah.wolf012@example.org', '0782123456', 'Weidenweg', '19', '67890', 'Nürnberg'),
+('Sophie', 'Meyer', 'sophie.meyer@example.com', '01701234567', 'Kastanienweg', '10', '12346', 'Berlin'),
+('Lukas', 'Schulz', 'lukas.schulz@example.com', '01509876543', 'Lindenstraße', '4', '54322', 'Hamburg'),
+('Timo', 'Hartmann', 'timo.hartmann@example.com', '01612345678', 'Birkenweg', '8', '98764', 'Köln'),
+('Clara', 'Becker', 'clara.becker@example.com', '01776543210', 'Eichenstraße', '12', '10116', 'Berlin');
+
+INSERT INTO Bestellungen (KundenID, ArtikelID, Menge, Bestelldatum)
+VALUES 
+(1, 11, 1, '2022-04-05'),
+(2, 9, 1, '2023-03-14'),
+(3, 13, 1, '2021-07-08'),
+(4, 5, 1, '2020-08-19'),
+(5, 7, 2, '2024-02-21'),
+(6, 8, 1, '2021-12-22'),
+(7, 3, 1, '2020-05-15'),
+(8, 10, 1, '2024-01-30'),
+(9, 12, 1, '2023-06-18'),
+(10, 14, 1, '2022-11-03'),
+(11, 15, 1, '2024-09-13'),
+(12, 6, 1, '2019-11-11'),
+(13, 18, 2, '2020-02-29'),
+(14, 16, 1, '2021-04-07'),
+(15, 4, 1, '2024-09-17'),
+(16, 2, 3, '2022-01-22'),
+(17, 1, 1, '2023-07-25'),
+(18, 17, 1, '2022-10-05'),
+(19, 19, 1, '2024-05-08'),
+(20, 13, 1, '2020-09-14');
