@@ -1,0 +1,210 @@
+IF DB_ID(N'AdmelioShop') IS NOT NULL
+BEGIN
+  ALTER DATABASE AdmelioShop SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+  DROP DATABASE AdmelioShop;
+END
+GO
+
+CREATE DATABASE AdmelioShop;
+GO
+USE AdmelioShop;
+GO
+
+/* ---------- Stammdaten ---------- */
+
+CREATE TABLE dbo.Waehrung (
+    Code NCHAR(3)  NOT NULL CONSTRAINT PK_Waehrung PRIMARY KEY,
+    Name NVARCHAR(50) NOT NULL
+);
+INSERT INTO dbo.Waehrung(Code, Name) VALUES (N'EUR', N'Euro');
+
+CREATE TABLE dbo.Artikelgruppe (
+    ArtikelgruppeID INT IDENTITY CONSTRAINT PK_Artikelgruppe PRIMARY KEY,
+    Name NVARCHAR(100) NOT NULL CONSTRAINT UQ_Artikelgruppe_Name UNIQUE
+);
+
+CREATE TABLE dbo.Artikel (
+    ID INT IDENTITY CONSTRAINT PK_Artikel PRIMARY KEY,
+    Artikelbezeichnung NVARCHAR(255) NOT NULL,
+    ArtikelgruppeID INT NOT NULL
+        CONSTRAINT FK_Artikel_Artikelgruppe REFERENCES dbo.Artikelgruppe(ArtikelgruppeID),
+    Preis SMALLMONEY NOT NULL,
+    WaehrungCode NCHAR(3) NOT NULL
+        CONSTRAINT FK_Artikel_Waehrung REFERENCES dbo.Waehrung(Code),
+    Vorraetig BIT NOT NULL
+);
+CREATE INDEX IX_Artikel_Gruppe ON dbo.Artikel(ArtikelgruppeID);
+
+CREATE TABLE dbo.Kunden (
+    ID INT IDENTITY CONSTRAINT PK_Kunden PRIMARY KEY,
+    Vorname NVARCHAR(100) NOT NULL,
+    Nachname NVARCHAR(50)  NOT NULL,
+    Email NVARCHAR(100)    NOT NULL,
+    Telefonnummer NVARCHAR(15) NULL,
+    Strasse NVARCHAR(100)  NOT NULL,
+    Hausnummer NCHAR(10)   NOT NULL,
+    PLZ NVARCHAR(5)        NOT NULL,
+    Ort NVARCHAR(100)      NOT NULL
+);
+CREATE INDEX IX_Kunden_Ort ON dbo.Kunden(Ort);
+
+-- Bestellung = Kopf
+CREATE TABLE dbo.Bestellungen (
+    ID INT IDENTITY CONSTRAINT PK_Bestellungen PRIMARY KEY,
+    KundenID INT NOT NULL
+        CONSTRAINT FK_Bestellungen_Kunden REFERENCES dbo.Kunden(ID),
+    Bestelldatum DATE NOT NULL,
+    Status NVARCHAR(20) NOT NULL DEFAULT(N'Bezahlt') -- simpel gehalten
+);
+CREATE INDEX IX_Bestellungen_KundeDatum ON dbo.Bestellungen(KundenID, Bestelldatum);
+
+-- Bestellpositionen = 1..n
+CREATE TABLE dbo.Bestellpositionen (
+    ID INT IDENTITY CONSTRAINT PK_Bestellpositionen PRIMARY KEY,
+    BestellungID INT NOT NULL
+        CONSTRAINT FK_Bestellpositionen_Bestellungen REFERENCES dbo.Bestellungen(ID),
+    ArtikelID INT NOT NULL
+        CONSTRAINT FK_Bestellpositionen_Artikel REFERENCES dbo.Artikel(ID),
+    Menge INT NOT NULL CONSTRAINT CK_Bestellpositionen_Menge CHECK (Menge > 0),
+    Einzelpreis SMALLMONEY NOT NULL,         -- Preis-Snapshot
+    WaehrungCode NCHAR(3) NOT NULL
+        CONSTRAINT FK_Bestellpositionen_Waehrung REFERENCES dbo.Waehrung(Code)
+);
+CREATE INDEX IX_Bestellpositionen_Bestellung ON dbo.Bestellpositionen(BestellungID);
+CREATE INDEX IX_Bestellpositionen_Artikel ON dbo.Bestellpositionen(ArtikelID);
+
+/* ---------- Seed: Artikelgruppen ---------- */
+
+INSERT INTO dbo.Artikelgruppe(Name)
+VALUES (N'Elektronik'), (N'Haushaltsgeräte'), (N'Zubehör'),
+       (N'Bürobedarf'), (N'Möbel');
+
+/* ---------- Seed: Artikel (1:1 zu deiner Liste) ---------- */
+
+;WITH A(Artikelbezeichnung, Gruppe, Preis, Waehrung, Vorraetig) AS (
+    SELECT N'Fernseher',                 N'Elektronik',       478.45, N'EUR', 0 UNION ALL
+    SELECT N'Laptop',                    N'Elektronik',      1050.79, N'EUR', 1 UNION ALL
+    SELECT N'Kühlschrank',               N'Haushaltsgeräte', 1155.30, N'EUR', 1 UNION ALL
+    SELECT N'Waschmaschine',             N'Haushaltsgeräte',  824.10, N'EUR', 1 UNION ALL
+    SELECT N'Smartphone',                N'Elektronik',       775.56, N'EUR', 1 UNION ALL
+    SELECT N'Tablet',                    N'Elektronik',       683.25, N'EUR', 1 UNION ALL
+    SELECT N'Eismaschine',               N'Haushaltsgeräte', 1025.49, N'EUR', 0 UNION ALL
+    SELECT N'Kopfhörer',                 N'Zubehör',           53.79, N'EUR', 1 UNION ALL
+    SELECT N'MacBook',                   N'Elektronik',       998.49, N'EUR', 1 UNION ALL
+    SELECT N'Monitor',                   N'Elektronik',       212.00, N'EUR', 1 UNION ALL
+    SELECT N'Maus',                      N'Elektronik',        28.65, N'EUR', 1 UNION ALL
+    SELECT N'Tastatur',                  N'Elektronik',        52.15, N'EUR', 1 UNION ALL
+    SELECT N'Drucker',                   N'Bürobedarf',        77.35, N'EUR', 1 UNION ALL
+    SELECT N'Schreibtisch',              N'Möbel',            251.75, N'EUR', 0 UNION ALL
+    SELECT N'Bürostuhl',                 N'Möbel',            145.45, N'EUR', 0 UNION ALL
+    SELECT N'Tintenpatrone',             N'Bürobedarf',        20.99, N'EUR', 1 UNION ALL
+    SELECT N'USB-Kabel',                 N'Elektronik',         8.25, N'EUR', 1 UNION ALL
+    SELECT N'Webcam',                    N'Elektronik',        61.80, N'EUR', 1 UNION ALL
+    SELECT N'Kugelschreiber (von Apple)',N'Bürobedarf',        98.75, N'EUR', 1 UNION ALL
+    SELECT N'Kaffeemaschine',            N'Haushaltsgeräte',  100.00, N'EUR', 1 UNION ALL
+    SELECT N'Staubsauger',               N'Haushaltsgeräte',  150.00, N'EUR', 1 UNION ALL
+    SELECT N'Mikrowelle',                N'Haushaltsgeräte',  180.00, N'EUR', 0 UNION ALL
+    SELECT N'Beamer',                    N'Elektronik',       700.00, N'EUR', 1 UNION ALL
+    SELECT N'Externe Festplatte',        N'Elektronik',       120.00, N'EUR', 1 UNION ALL
+    SELECT N'Bluetooth Lautsprecher',    N'Zubehör',           30.00, N'EUR', 1 UNION ALL
+    SELECT N'Smartwatch',                N'Elektronik',       250.00, N'EUR', 1 UNION ALL
+    SELECT N'Fitness Tracker',           N'Elektronik',       120.00, N'EUR', 1 UNION ALL
+    SELECT N'Kühlbox',                   N'Haushaltsgeräte',   80.00, N'EUR', 1 UNION ALL
+    SELECT N'Taschenlampe',              N'Zubehör',           15.00, N'EUR', 1 UNION ALL
+    SELECT N'Druckerpapier',             N'Bürobedarf',         5.99, N'EUR', 1 UNION ALL
+    SELECT N'Sitzsack',                  N'Möbel',             69.99, N'EUR', 1 UNION ALL
+    SELECT N'Laptoptasche',              N'Zubehör',           45.00, N'EUR', 1
+)
+INSERT INTO dbo.Artikel(Artikelbezeichnung, ArtikelgruppeID, Preis, WaehrungCode, Vorraetig)
+SELECT A.Artikelbezeichnung, G.ArtikelgruppeID, A.Preis, A.Waehrung, A.Vorraetig
+FROM A
+JOIN dbo.Artikelgruppe AS G ON G.Name = A.Gruppe;
+
+-- Kunden (deine Liste 1:1)
+INSERT INTO dbo.Kunden (Vorname, Nachname, Email, Telefonnummer, Strasse, Hausnummer, PLZ, Ort)
+VALUES 
+('Max','Mustermann','max.mustermann123@example.com','0123456789','Musterstraße','1','12345','Berlin'),
+('Lisa','Müller','lisa.mueller456@example.net','0987654321','Lindenweg','5','54321','Hamburg'),
+('John','Doe','john.doe789@example.org','0123987654','Hauptstraße','12','98765','Köln'),
+('Anna','Schmidt','anna.schmidt101@example.com','0301234567','Blumenweg','8','10115','Berlin'),
+('Peter','Meier','peter.meier202@example.de','0409876543','Bergstraße','20','20457','Hamburg'),
+('Julia','Fischer','julia_fischer333@example.eu','0711123456','Wiesenstraße','3','70173','Stuttgart'),
+('David','Weber','david.weber444@example.biz','0691234567','Waldweg','15','60313','Frankfurt'),
+('Marie','Schneider','marie.schneider555@example.co','0896543210','Bahnhofstraße','25','80331','München'),
+('Tom','Becker','tom.becker666@example.tv','0211123456','Schillerstraße','7','40210','Düsseldorf'),
+('Laura','Wolf','laura_wolf777@example.name','0613123456','Goethestraße','14','55116','Mainz'),
+('Michael','Koch','michael.koch888@example.pro','0911234567','Marktplatz','9','90403','Nürnberg'),
+('Clara','Lange','clara.lange123@example.de','0701234567','Wiesenstraße','11','50123','Düsseldorf'),
+('Felix','Bauer','felix.bauer234@example.org','0765123456','Hauptstraße','18','40210','Köln'),
+('Sophia','Richter','sophia.richter345@example.net','0731123456','Bachstraße','5','12345','Stuttgart'),
+('Lukas','Zimmermann','lukas.zimmermann456@example.co','0745123456','Eichenweg','3','53212','München'),
+('Marie','Becker','marie.becker567@example.biz','0708123456','Lindenstraße','9','67212','Berlin'),
+('Kai','Schwarz','kai.schwarz678@example.tv','0723123456','Pappelstraße','7','23456','Hamburg'),
+('Eva','Neumann','eva.neumann789@example.pro','0751123456','Birkenweg','15','34567','Mainz'),
+('Maximilian','Mayer','maximilian.mayer890@example.name','0748123456','Rosenstraße','21','45678','Frankfurt'),
+('Hannah','Kramer','hannah.kramer901@example.com','0759123456','Bergstraße','17','34567','Köln'),
+('Noah','Wolf','noah.wolf012@example.org','0782123456','Weidenweg','19','67890','Nürnberg'),
+('Sophie','Meyer','sophie.meyer@example.com','01701234567','Kastanienweg','10','12346','Berlin'),
+('Lukas','Schulz','lukas.schulz@example.com','01509876543','Lindenstraße','4','54322','Hamburg'),
+('Timo','Hartmann','timo.hartmann@example.com','01612345678','Birkenweg','8','98764','Köln'),
+('Clara','Becker','clara.becker@example.com','01776543210','Eichenstraße','12','10116','Berlin');
+
+/* ---------- Bestellungen der letzten 3 Jahre ---------- */
+
+DECLARE @Heute DATE = CAST(GETDATE() AS DATE);
+DECLARE @Start DATE = DATEADD(YEAR, -3, @Heute);   -- genau letzte 3 Jahre
+DECLARE @Days  INT  = DATEDIFF(DAY, @Start, @Heute);
+DECLARE @Orders INT = 300;                          -- Anzahl Bestellungen (voller, aber moderat)
+
+-- Tally 1..N
+;WITH Tally AS (
+  SELECT TOP (@Orders) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS n
+  FROM sys.all_objects
+),
+Orders AS (
+  -- verteilt die Bestelldaten über die letzten 3 Jahre deterministisch
+  SELECT 
+    n,
+    KundenID   = ((n - 1) % (SELECT COUNT(*) FROM dbo.Kunden)) + 1,
+    Bestelldatum = DATEADD(DAY, (n % NULLIF(@Days,0)), @Start),
+    Status = CASE (n % 4)
+               WHEN 0 THEN N'Bezahlt'
+               WHEN 1 THEN N'Versendet'
+               WHEN 2 THEN N'Bezahlt'
+               ELSE N'Erstellt'
+             END
+  FROM Tally
+)
+INSERT INTO dbo.Bestellungen (KundenID, Bestelldatum, Status)
+SELECT KundenID, Bestelldatum, Status
+FROM Orders
+ORDER BY n;
+
+-- Für jede Bestellung 1..5 Positionen (Mengen variieren 1..4), Artikel rotierend
+;WITH B AS (
+  SELECT ID, n = ROW_NUMBER() OVER (ORDER BY ID) 
+  FROM dbo.Bestellungen
+),
+P AS (
+  SELECT 
+    BestellungID = B.ID,
+    PosNum       = v.pos,
+    ArtikelID    = ((B.n * 3 + v.pos) % (SELECT COUNT(*) FROM dbo.Artikel)) + 1,
+    Menge        = ((B.n + v.pos) % 4) + 1  -- 1..4
+  FROM B
+  CROSS APPLY (VALUES (1), (2), (3), (4), (5)) AS v(pos)   -- bis zu 5 Positionen je Bestellung
+  WHERE v.pos <= ((B.n % 5) + 1)                           -- 1..5 Positionen je Bestellung
+)
+INSERT INTO dbo.Bestellpositionen (BestellungID, ArtikelID, Menge, Einzelpreis, WaehrungCode)
+SELECT 
+  P.BestellungID,
+  P.ArtikelID,
+  P.Menge,
+  A.Preis,           -- einfacher Preis-Snapshot (kein Verlauf)
+  A.WaehrungCode
+FROM P
+JOIN dbo.Artikel A ON A.ID = P.ArtikelID;
+
+-- Schnellchecks:
+-- SELECT MIN(Bestelldatum) AS Von, MAX(Bestelldatum) AS Bis, COUNT(*) AS Bestellungen FROM dbo.Bestellungen;
+-- SELECT TOP 10 * FROM dbo.Bestellpositionen;
